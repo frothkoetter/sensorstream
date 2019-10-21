@@ -1,18 +1,29 @@
 create database workshop;
 
+ALTER TABLE workshop.simulation SET TBLPROPERTIES('druid.kafka.ingestion' = 'STOP');
+DROP TABLE workshop.simulation;
+# evtl. disable table in DRUID.Coordinator
+
+# column name lowercase
+
 CREATE EXTERNAL TABLE workshop.simulation (
 `__time` timestamp,
-`NodeID` string,
-`opcvalue`  double
+`tagname` string,
+`value`  double
 )
 STORED BY 'org.apache.hadoop.hive.druid.DruidStorageHandler'
 TBLPROPERTIES (
 "kafka.bootstrap.servers" = "demo.cloudera.com:6667",
-"kafka.topic" = "demo_nifi_opc",
+"kafka.topic" = "my_demo_opc",
 "druid.kafka.ingestion.useEarliestOffset" = "true",
 "druid.kafka.ingestion.maxRowsInMemory" = "5",
 "druid.kafka.ingestion.startDelay" = "PT1S",
 "druid.kafka.ingestion.period" = "PT1S",
 "druid.kafka.ingestion.consumer.retries" = "2"
 );
+select * from workshop.simulation;
+# no rows
 ALTER TABLE workshop.simulation SET TBLPROPERTIES('druid.kafka.ingestion' = 'START');
+
+select * from workshop.simulation;
+# start pulling in rows --- check Overlord http://demo.cloudera.com:8090/console.html
